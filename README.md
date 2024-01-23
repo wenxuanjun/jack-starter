@@ -371,8 +371,3 @@ fn main() {
 运行它，你应该能够听到赠送的`Sample.wav`，按<kbd>Curl + C</kbd>结束程序后，你还能见到同时录制的`Record.wav`。这时你应该能完全切实地体验到jack的简易与Channel的便捷。
 
 以上就是这部分教程的全部内容，您可以将本指南提供的所有示例代码用于任何目的。请注意，如果您在自己的项目中使用它们，您可能需要注明或提及本指南的作者。
-
-<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({ tex2jax: {inlineMath: [['$', '$']]}, messageStyle: "none" });
-</script>
