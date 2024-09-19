@@ -1,0 +1,5 @@
+# Audio files for testing
+*.wav
+
+# Allow test audio files
+!Sample.wav

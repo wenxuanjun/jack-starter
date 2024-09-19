@@ -1,9 +1,9 @@
-const CAPTURE_WAVE_FILE: &str = "Record.wav";
-const PLAYBACK_WAVE_FILE: &str = "Sample.wav";
+const CAPTURE_WAVE_FILE: &str = "../Record.wav";
+const PLAYBACK_WAVE_FILE: &str = "../Sample.wav";
 
 fn main() {
     let (client, _status) =
-        jack::Client::new("AcousticLink", jack::ClientOptions::NO_START_SERVER).unwrap();
+        jack::Client::new("AcousticLink", jack::ClientOptions::default()).unwrap();
 
     let in_port = client
         .register_port("input", jack::AudioIn::default())
@@ -34,7 +34,7 @@ fn main() {
         jack::Control::Continue
     };
 
-    let input_thread = std::thread::spawn(move || {
+    std::thread::spawn(move || {
         let wav_spec = hound::WavSpec {
             channels: 1,
             bits_per_sample: 32,
@@ -43,21 +43,22 @@ fn main() {
         };
         let mut writer = hound::WavWriter::create(CAPTURE_WAVE_FILE, wav_spec).unwrap();
         loop {
-            let sample = input_receiver.recv().unwrap();
-            writer.write_sample(sample).unwrap();
+            if let Ok(sample) = input_receiver.recv() {
+                writer.write_sample(sample).unwrap();
+            }
         }
     });
 
-    let output_thread = std::thread::spawn(move || {
+    std::thread::spawn(move || {
         let mut reader = hound::WavReader::open(PLAYBACK_WAVE_FILE).unwrap();
         for sample in reader.samples::<i16>() {
             const AMPLITUDE: f32 = i16::MAX as f32;
             let sample = sample.unwrap() as f32 / AMPLITUDE;
             output_sender.send(sample).unwrap();
-        } 
+        }
     });
 
-    let process = jack::ClosureProcessHandler::new(process_callback);
+    let process = jack::contrib::ClosureProcessHandler::new(process_callback);
     let active_client = client.activate_async((), process).unwrap();
 
     let client = active_client.as_client();
@@ -68,8 +69,9 @@ fn main() {
         .connect_ports_by_name(&out_port_name, "system:playback_1")
         .unwrap();
 
-    input_thread.join().unwrap();
-    output_thread.join().unwrap();
+    println!("Press enter or return to quit...");
+    let mut user_input = String::new();
+    std::io::stdin().read_line(&mut user_input).ok();
 
     active_client.deactivate().unwrap();
 }
