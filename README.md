@@ -630,7 +630,6 @@ func main() {
 
 		for {
 			samples, err := reader.ReadSamples(1)
-
 			if err == io.EOF {
 				break
 			}
